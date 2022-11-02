@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: dbt_dalejandrorobledo
+    tables:
+      - name: summary_ga_2017_july
+     
