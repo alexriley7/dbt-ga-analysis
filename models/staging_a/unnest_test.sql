@@ -6,7 +6,7 @@ with orders as (
 ),
 
 numbers as (
-    select * from dbt_dalejandrorobledo__dev.numbersb
+    select * from dbt_dalejandrorobledo__dev.numbers
 ),
 
 joined as (
@@ -15,14 +15,14 @@ joined as (
         json_array_length(orders.items, true) as number_of_items,
         json_extract_array_element_text(
             orders.items, 
-            numbers.ordinal::int, 
+            numbers.generated_number::int, 
             true
             ) as item
     from orders
     cross join numbers
     --only generate the number of records in the cross join that corresponds
     --to the number of items in the order
-    where numbers.ordinal <
+    where numbers.generated_number <
         json_array_length(orders.items, true)
 ),
 
