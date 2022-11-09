@@ -54,4 +54,33 @@ SELECT
             ,CASE WHEN visitStartTime not like '%visitStartTime%' THEN CAST(visitStartTime as decimal) 
              WHEN visitStartTime like '%visitStartTime' THEN 0 END AS created_at_utc
 
+             --,CASE WHEN pageviews not like '%pageviews%' THEN CAST (pageviews as varchar(max)) WHEN pageviews like '%pageviews%' THEN 'x' 
+             --WHEN pageviews like ' ' THEN 'x' END AS pageviews_cast
+
+             ,CASE WHEN 
+           pageviews like '%1%' or
+           pageviews like '%2%' or
+           pageviews like '%3%' or
+           pageviews like '%4%' or
+           pageviews like '%5%' or
+           pageviews like '%6%' or
+           pageviews like '%7%' or
+           pageviews like '%8%' or
+           pageviews like '%9%' or
+           pageviews like '%0%'   THEN CAST(pageviews as decimal)
+
+          WHEN 
+           pageviews not like '%1%' or
+           pageviews not like '%2%' or
+           pageviews not like '%3%' or
+           pageviews not like '%4%' or
+           pageviews not like '%5%' or
+           pageviews not like '%6%' or
+           pageviews not like '%7%' or
+           pageviews not like '%8%' or
+           pageviews not like '%9%' or
+           pageviews not like '%0%' THEN 0 END AS pageviews_int
+
+           ,visitStartTime
+
  from dbt_dalejandrorobledo.ga360_20170707_raw_b
