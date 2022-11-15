@@ -1,0 +1,11 @@
+
+version: 2
+
+models:
+    - name: ga360_20170707_raw_b
+      description: "A starter dbt model"
+     
+
+    - name: ga_360_20170707_raw_b_clean
+      description: "A starter dbt model"
+      
