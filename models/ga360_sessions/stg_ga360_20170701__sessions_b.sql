@@ -1,1 +1,0 @@
-select * from dbt_dalejandrorobledo_dev.stg_ga360_20170701__sessions
