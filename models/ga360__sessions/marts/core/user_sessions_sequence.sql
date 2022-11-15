@@ -40,4 +40,4 @@ with source_data as (
 
 ) SELECT * FROM sessions_sequence
 
-        ORDER BY session_timestamp DESC
+        --ORDER BY session_timestamp DESC
