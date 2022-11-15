@@ -12,4 +12,33 @@ with source_data as (
     SELECT * FROM source_data
 
 
-) SELECT * FROM source_data_deduplicated
+) 
+
+,source_data_inserted AS (
+
+
+SELECT 
+
+    Id
+    ,fullvisitorId
+    ,visitId
+    ,pageviews
+    ,transactions
+    ,transactionrevenue
+    ,hits
+    ,current_timestamp AS insertion_timestamp
+
+FROM source_data_deduplicated
+
+)
+
+,unique_source AS (
+
+SELECT * ,
+                    ROW_NUMBER() OVER (PARTITION BY Id) AS ROW_NUMBER
+                    FROM source_data_inserted
+
+) SELECT * FROM unique_source
+
+    WHERE row_number = 1
+
