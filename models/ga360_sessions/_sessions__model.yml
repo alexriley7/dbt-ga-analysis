@@ -1,9 +1,0 @@
-version: 2
-
-models:
-    - name: stg_ga360_20170701__sessions_b
-      description: "A starter dbt model"
-      columns:
-          - name: rownum_int
-            description: "The primary key for this table"
-            
