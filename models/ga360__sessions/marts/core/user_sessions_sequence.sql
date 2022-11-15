@@ -40,4 +40,4 @@ with source_data as (
 
 ) SELECT * FROM sessions_sequence
 
---ORDER BY created_at_utc_cast DESC
+        ORDER BY session_timestamp DESC
