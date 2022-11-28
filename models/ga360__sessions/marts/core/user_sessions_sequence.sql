@@ -1,43 +1,67 @@
+ {{ 
+    config(
+            materialized='incremental'
+            ,unique_key='visitid'
+            ,incremental_strategy='delete+insert'
+            
+            ) 
+            
+}}
 
-{{ config(materialized='view' , schema='dev') }}
+
+WITH 
+{% if is_incremental() %}
+
+incremental_users_source as (
+
+    select
+        distinct fullvisitorId
+
+    from {{ ref('int_ga360__sessions') }}
+
+    where created_at_utc_cast > (select max(created_at_utc_cast) from {{ this }})
+
+),
+{% endif %}
 
 
-with source_data as (
+sessions_source as (
 
-    select * from {{ ref('int_ga360__sessions') }}
+    select
+        *
 
-) 
+    from {{ ref('int_ga360__sessions') }} as v_sessions_w
 
-, sessions_sequence AS (SELECT
-    v_sessions_w.visitId AS session_id
-    ,v_sessions_w.fullvisitorId AS user_key
-    ,v_sessions_w.created_at_utc_cast AS session_timestamp
-    --,transactions_int
-    ,v_sessions_w.pageviews AS sum_pageviews
-    --,SUM(pageviews_int) OVER() AS sum_pageviews
-    ,SUM(sum_pageviews) OVER (PARTITION BY user_key ORDER BY session_timestamp rows between unbounded preceding and current row) AS cumulated_pageviews
 
-    
+   {% if is_incremental() %}
+    where exists (
+        select users.fullvisitorId
+        from incremental_users_source as users
+        where users.fullvisitorId =  v_sessions_w.fullvisitorId	 
+    )
+    {% endif %}
 
-    ,ROW_NUMBER() OVER (PARTITION BY user_key ORDER BY session_timestamp) AS client_session_sequence
-    ,ROW_NUMBER() OVER (PARTITION BY user_key ORDER BY session_timestamp) = 1 AS is_client_first_session
-    ,LAG(session_id) OVER (PARTITION BY user_key ORDER BY session_timestamp) AS client_previous_session_id
-    ,LEAD(session_id) OVER (PARTITION BY user_key ORDER BY session_timestamp) AS client_next_order_id
-    
-    
-    --,transactionrevenue
-    --,SUM(dbt_dalejandrorobledo.ga360_20170707_raw_b.pageviews)
+),
 
-    FROM source_data as v_sessions_w
-    --WHERE transactions_int > 0
-    --JOIN dbt_dalejandrorobledo.ga360_20170707_raw_b ON dbt_dalejandrorobledo.ga360_20170707_raw_b.rownum = v_sessions_w.rownum_int
-    --JOIN dbt_dalejandrorobledo.ga360_20170707_raw_b ON dbt_dalejandrorobledo.ga360_20170707_raw_b.visitId = v_sessions_w.session_id
-    --check with pageviews or eccomerce action type
-    --GROUP BY 1,2,3,4
-    --eCommerceAction.action_type !!!
+    cte AS (
 
-    
+        select
+        v_sessions_w.visitId
+        ,v_sessions_w.fullvisitorId
+        ,v_sessions_w.created_at_utc_cast
 
-) SELECT * FROM sessions_sequence
+        ,pageviews AS count_pageviews
+        ,SUM(pageviews) OVER (PARTITION BY visitId ORDER BY created_at_utc_cast rows between unbounded preceding and current row) AS cumulated_pageviews
 
-        --ORDER BY session_timestamp DESC
+        ,ROW_NUMBER() OVER (PARTITION BY v_sessions_w.fullvisitorId ORDER BY v_sessions_w.created_at_utc_cast) AS user_session_sequence
+        ,ROW_NUMBER() OVER (PARTITION BY v_sessions_w.fullvisitorId ORDER BY v_sessions_w.created_at_utc_cast) = 1 AS is_user_first_session
+        ,LAG(v_sessions_w.visitId) OVER (PARTITION BY v_sessions_w.fullvisitorId ORDER BY v_sessions_w.created_at_utc_cast) AS user_previous_session_id
+        ,LEAD(v_sessions_w.visitId) OVER (PARTITION BY v_sessions_w.fullvisitorId ORDER BY v_sessions_w.created_at_utc_cast ) AS user_next_order_id
+
+        from sessions_source as v_sessions_w
+
+    )
+
+    SELECT * FROM cte
+
+    ORDER BY cte.created_at_utc_cast DESC

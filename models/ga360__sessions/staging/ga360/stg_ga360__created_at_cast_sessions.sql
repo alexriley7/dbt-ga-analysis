@@ -1,4 +1,4 @@
-{{ config(materialized='view' , schema='dev_stg') }}
+{{ config(materialized='table' , schema='dev_stg') }}
 
 
 with source_data as (
