@@ -4,7 +4,7 @@ models:
     - name: user_sessions_sequence
       description: "A starter dbt model"
       columns:
-          - name: id
+          - name: session_id
             description: "The primary key for this table"
-            tests:
+          
                 

@@ -5,8 +5,5 @@ models:
     - name: int_ga360__sessions
       description: "A starter dbt model"
       columns:
-          - name: id
+          - name: visitId
             description: "The primary key for this table"
-            tests:
-                - unique
-                - not_null
